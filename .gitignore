@@ -1,5 +1,4 @@
-records
+*.keras
 *.wav
 *.ogg
-*.keras
 .env
