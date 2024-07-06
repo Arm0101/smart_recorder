@@ -1,4 +1,6 @@
+models/
 *.keras
 *.wav
 *.ogg
 .env
+*.pt
