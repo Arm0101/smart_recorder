@@ -1,12 +1,10 @@
-import os
-import librosa
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv1D, MaxPooling1D, LSTM, Dense, Dropout
 from tensorflow.keras.optimizers import Adam
 from sklearn.model_selection import train_test_split
-from dataset import prepare_dataset
+from training.dataset import prepare_dataset
 
 conv_filters = 64
 conv_kernel_size = 3
@@ -19,11 +17,11 @@ dense_units = 64
 dropout_rate = 0.4
 learning_rate = 0.0005
 
-base_path = 'dataset'
+base_path = '../dataset'
 data, labels, label_map = prepare_dataset(base_path)
 print(label_map)
 
-# Dividir el conjunto de datos en entrenamiento, validación y prueba
+
 X_train, X_temp, y_train, y_temp = train_test_split(data, labels, test_size=0.2, random_state=42)
 X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)
 
@@ -59,5 +57,5 @@ history = model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=50,
 test_loss, test_accuracy = model.evaluate(X_test, y_test)
 print(f"Test Accuracy: {test_accuracy}")
 
-model_save_path = 'models/speaker_identification.keras'
+model_save_path = '../models/speaker_identification.keras'
 model.save(model_save_path)

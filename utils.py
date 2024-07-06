@@ -38,3 +38,13 @@ def preprocess_recording(audio_path, output_dir='', n_seg=10):
         segment_filename = os.path.join(output_dir,
                                         f"{os.path.basename(audio_path).split('.')[0]}_segment_{i // segment_duration}.wav")
         segment.export(segment_filename, format="wav")
+
+
+def rename_w_audio(path):
+    for file in os.listdir(path):
+        file_name = file.split(' ')[2:]
+        file_name = '_'.join(file_name)
+        name, ext = os.path.splitext(file_name)
+        file_name = name.replace('.', '-') + ext
+        file_name = os.path.join(path, file_name)
+        os.rename(os.path.join(path, file), file_name)

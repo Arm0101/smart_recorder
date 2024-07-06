@@ -1,19 +1,9 @@
-from utils import convert_audios_to_wav, preprocess_recording
-from dataset import extract_features, build_dataset
+from utils import convert_audios_to_wav
+from training.dataset import extract_features
 import tensorflow as tf
 import numpy as np
 import os
 import librosa
-
-
-def rename_w_audio(path):
-    for file in os.listdir(path):
-        file_name = file.split(' ')[2:]
-        file_name = '_'.join(file_name)
-        name, ext = os.path.splitext(file_name)
-        file_name = name.replace('.', '-') + ext
-        file_name = os.path.join(path, file_name)
-        os.rename(os.path.join(path, file), file_name)
 
 
 def load_model(model_save_path):
@@ -29,7 +19,7 @@ if __name__ == '__main__':
 
     # build_dataset('recordings', 'dataset')
     # print('dataset completed')
-    test_paths = 'test_recordings'
+    test_paths = 'test/test_recordings'
     convert_audios_to_wav(test_paths)
     model = load_model('models/speaker_identification.keras')
     if not model:
