@@ -8,6 +8,7 @@ from emotion_recognition import predict_emotion
 from transcription import transcribe_audio
 import librosa
 import sounddevice as sd
+import shutil
 
 if __name__ == '__main__':
     temp_path = 'temp'
@@ -24,30 +25,41 @@ if __name__ == '__main__':
     print(sd.query_devices())
     device = int(input('select device: '))
 
-    record_audio(duration=5, output_dir=temp_path, output_filename=audio_name, device=device)
-    _audio_path = os.path.join(temp_path, audio_name)
-    if not os.path.exists(_audio_path):
-        exit(1)
+    while True:
+        duration = input('Duration: ')
+        try:
+            duration = int(duration)
+        except ValueError:
+            break
+        if (os.path.
+                exists(temp_path)):
+            shutil.rmtree(temp_path)
+            os.makedirs(temp_path)
 
-    segment_audio(audio_path=_audio_path, pipeline=pipeline)
+        record_audio(duration=duration, output_dir=temp_path, output_filename=audio_name, device=device)
+        _audio_path = os.path.join(temp_path, audio_name)
+        if not os.path.exists(_audio_path):
+            exit(1)
 
-    temp_files = filter(lambda f: f != audio_name and f.endswith('.wav'), os.listdir(temp_path))
+        segment_audio(audio_path=_audio_path, pipeline=pipeline)
 
-    for audio_path in temp_files:
+        temp_files = filter(lambda f: f != audio_name and f.endswith('.wav'), os.listdir(temp_path))
 
-        audio, sr = librosa.load(os.path.join(temp_path, audio_path))
-        if librosa.get_duration(y=audio, sr=sr) < 1:
-            continue
+        for audio_path in temp_files:
 
-        full_path = person_path = os.path.join(temp_path, audio_path)
+            audio, sr = librosa.load(os.path.join(temp_path, audio_path))
+            if librosa.get_duration(y=audio, sr=sr) < 1:
+                continue
 
-        prediction, predicted_label, predicted_person = speaker_verification(full_path, classification_model,
-                                                                             label_map_file)
-        print(f'prediction {prediction}\n')
-        print(f'{predicted_label}: {predicted_person}')
+            full_path = person_path = os.path.join(temp_path, audio_path)
 
-        predicted_emotion = predict_emotion(full_path, emo_model, emo_model_processor)
-        print(f"emotion: {predicted_emotion}")
+            prediction, predicted_label, predicted_person = speaker_verification(full_path, classification_model,
+                                                                                 label_map_file)
+            print(f'prediction {prediction}\n')
+            print(f'{predicted_label}: {predicted_person}')
 
-        text = transcribe_audio(full_path)
-        print(f'transcription: {text}')
+            predicted_emotion = predict_emotion(full_path, emo_model, emo_model_processor)
+            print(f"emotion: {predicted_emotion}")
+
+            text = transcribe_audio(full_path)
+            print(f'transcription: {text}')
