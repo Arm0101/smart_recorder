@@ -37,7 +37,7 @@ if __name__ == '__main__':
 
         audio, sr = librosa.load(os.path.join(temp_path, audio_path))
         if librosa.get_duration(y=audio, sr=sr) < 1:
-             continue
+            continue
 
         full_path = person_path = os.path.join(temp_path, audio_path)
 
