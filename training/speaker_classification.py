@@ -5,6 +5,7 @@ from tensorflow.keras.layers import Conv1D, MaxPooling1D, LSTM, Dense, Dropout
 from tensorflow.keras.optimizers import Adam
 from sklearn.model_selection import train_test_split
 from training.dataset import prepare_dataset
+from utils import save_label_map
 
 conv_filters = 64
 conv_kernel_size = 3
@@ -15,12 +16,12 @@ pool_size = 2
 lstm_units = 128
 dense_units = 64
 dropout_rate = 0.4
-learning_rate = 0.0005
+learning_rate = 0.0001
 
 base_path = '../dataset'
-data, labels, label_map = prepare_dataset(base_path)
-print(label_map)
-
+cache_file = '../models/speaker_identification.pkl'
+data, labels, label_map = prepare_dataset(base_path, cache_file=cache_file, use_cache=cache_file)
+save_label_map(label_map, '../models/speaker_identification_label_map.json')
 
 X_train, X_temp, y_train, y_temp = train_test_split(data, labels, test_size=0.2, random_state=42)
 X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)

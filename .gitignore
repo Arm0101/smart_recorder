@@ -1,6 +1,8 @@
-models/
 *.keras
 *.wav
 *.ogg
 .env
 *.pt
+*.bin
+*.safetensors
+_

@@ -2,7 +2,18 @@ import os
 import numpy as np
 import librosa
 import noisereduce as nr
+import pickle
 from utils import convert_audios_to_wav, preprocess_recording
+
+
+def save_dataset(data, labels, label_map, filename):
+    with open(filename, 'wb') as f:
+        pickle.dump((data, labels, label_map), f)
+
+
+def load_dataset(filename):
+    with open(filename, 'rb') as f:
+        return pickle.load(f)
 
 
 def extract_features(file_path, n_mfcc=13):
@@ -17,7 +28,11 @@ def extract_features(file_path, n_mfcc=13):
     return mfccs_mean
 
 
-def prepare_dataset(base_path):
+def prepare_dataset(base_path, cache_file, use_cache):
+    cache_file_exists = os.path.exists(cache_file)
+    if cache_file_exists and use_cache:
+        return load_dataset(cache_file)
+
     data = []
     labels = []
     label_map = {}
@@ -39,6 +54,8 @@ def prepare_dataset(base_path):
 
     data = np.array(data)
     labels = np.array(labels)
+    if cache_file_exists:
+        save_dataset(data, labels, label_map, cache_file)
     return data, labels, label_map
 
 
@@ -52,5 +69,3 @@ def build_dataset(base_path, output_path):
                 if file_name.endswith('.wav'):
                     output_dir = os.path.join(output_path, person_name)
                     preprocess_recording(file_path, output_dir=output_dir)
-
-

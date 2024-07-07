@@ -1,46 +1,53 @@
-from utils import convert_audios_to_wav
-from training.dataset import extract_features
-import tensorflow as tf
-import numpy as np
 import os
+from load import load_verification_model, load_emo_model
+from utils import record_audio
+from speaker_diarization import load_pipeline_from_pretrained
+from speaker_verification import speaker_verification
+from speaker_diarization import segment_audio
+from emotion_recognition import predict_emotion
+from transcription import transcribe_audio
 import librosa
-
-
-def load_model(model_save_path):
-    if os.path.exists(model_save_path):
-        loaded_model = tf.keras.models.load_model(model_save_path)
-        return loaded_model
-    else:
-        return None
-
+import sounddevice as sd
 
 if __name__ == '__main__':
-    labels = ['carlos', 'jose', 'armando', 'ovidio']
+    temp_path = 'temp'
+    audio_name = 'audio.wav'
+    label_map_file = 'models/speaker_identification_label_map.json'
 
-    # build_dataset('recordings', 'dataset')
-    # print('dataset completed')
-    test_paths = 'test/test_recordings'
-    convert_audios_to_wav(test_paths)
-    model = load_model('models/speaker_identification.keras')
-    if not model:
+    PATH_TO_CONFIG = "models/pyannote_diarization_config.yaml"
+    pipeline = load_pipeline_from_pretrained(PATH_TO_CONFIG)
+    classification_model = load_verification_model('models/speaker_identification.keras')
+    emo_model, emo_model_processor = load_emo_model('models/emo_model')
+    print('models loaded')
+
+    # List available audio devices
+    print(sd.query_devices())
+    device = int(input('select device: '))
+
+    record_audio(duration=5, output_dir=temp_path, output_filename=audio_name, device=device)
+    _audio_path = os.path.join(temp_path, audio_name)
+    if not os.path.exists(_audio_path):
         exit(1)
-    for audio_path in os.listdir(test_paths):
-        audio, sr = librosa.load(os.path.join(test_paths, audio_path))
-        # if librosa.get_duration(y=audio, sr=sr) > 11:
-        #     continue
-        full_path = person_path = os.path.join(test_paths, audio_path)
-        features = extract_features(full_path)
 
-        features = np.expand_dims(features, axis=0)  # Añadir dimensión de lote
-        features = np.expand_dims(features, axis=-1)  # Añadir dimensión de canal
+    segment_audio(audio_path=_audio_path, pipeline=pipeline)
 
-        prediction = model.predict(features)
+    temp_files = filter(lambda f: f != audio_name and f.endswith('.wav'), os.listdir(temp_path))
+
+    for audio_path in temp_files:
+
+        audio, sr = librosa.load(os.path.join(temp_path, audio_path))
+        if librosa.get_duration(y=audio, sr=sr) < 1:
+             continue
+
+        full_path = person_path = os.path.join(temp_path, audio_path)
+
+        prediction, predicted_label, predicted_person = speaker_verification(full_path, classification_model,
+                                                                             label_map_file)
         print(f'prediction {prediction}\n')
-        predicted_label = np.argmax(prediction, axis=1)
-        print(f"Predicted label: {predicted_label}")
-        print(labels[predicted_label[0]])
-        print('-------------------------------\n')
-        # label_map_inverted = {v: k for k, v in label_map.items()}  # Invertir el mapa de etiquetas
-        # predicted_person = label_map_inverted[predicted_label[0]]
+        print(f'{predicted_label}: {predicted_person}')
 
-    # print(f"Predicted person: {predicted_person}")
+        predicted_emotion = predict_emotion(full_path, emo_model, emo_model_processor)
+        print(f"emotion: {predicted_emotion}")
+
+        text = transcribe_audio(full_path)
+        print(f'transcription: {text}')

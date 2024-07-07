@@ -1,0 +1,14 @@
+pydub
+scikit-learn
+speechrecognition
+wave
+transformers
+sounddevice
+librosa
+numpy
+pandas
+noisereduce
+datasets
+pyannote.audio
+tensorflow
+torch

@@ -23,7 +23,7 @@ def load_pipeline_from_pretrained(path_to_config: str | Path) -> Pipeline:
     return pipeline
 
 
-def segment_audio(audio_path, pipeline: Pipeline):
+def segment_audio(audio_path, pipeline: Pipeline, out_dir='temp'):
     diarization = pipeline(audio_path)
 
     audio = AudioSegment.from_wav(audio_path)
@@ -33,8 +33,5 @@ def segment_audio(audio_path, pipeline: Pipeline):
         end_time = turn[0].end * 1000
         speaker_label = turn[2]
         segment = audio[start_time:end_time]
-        segment.export(f"speaker_{speaker_label}_segment_{i}.wav", format="wav")
-
-
-PATH_TO_CONFIG = "models/pyannote_diarization_config.yaml"
-pipeline = load_pipeline_from_pretrained(PATH_TO_CONFIG)
+        file_name = os.path.join(out_dir, f'{speaker_label}_{i}.wav')
+        segment.export(file_name, format="wav")
