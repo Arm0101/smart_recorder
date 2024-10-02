@@ -5,4 +5,4 @@
 *.pt
 *.bin
 *.safetensors
-_
+*.pkl

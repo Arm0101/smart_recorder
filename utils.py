@@ -6,8 +6,12 @@ import os
 import json
 
 
-def ogg_to_wav(ogg_file, wav_file):
-    audio = AudioSegment.from_ogg(ogg_file)
+def to_wav(file, wav_file, audio_format='ogg'):
+    audio = None
+    if audio_format == 'ogg':
+        audio = AudioSegment.from_ogg(file)
+    elif audio_format == 'mp3':
+        audio = AudioSegment.from_mp3(file)
     audio.export(wav_file, format="wav")
 
 
@@ -16,16 +20,18 @@ def convert_audios_to_wav(path):
         _path = os.path.join(path, f)
         if os.path.isdir(_path):
             for file_name in os.listdir(_path):
-                if file_name.endswith('.ogg'):
+                file_format = file_name.split('.')[-1]
+                if file_format == 'ogg' or file_format == 'mp3':
                     file_path = os.path.join(_path, file_name)
                     output_path = os.path.splitext(file_path)[0] + '.wav'
                     if not os.path.exists(output_path):
-                        ogg_to_wav(file_path, output_path)
+                        to_wav(file_path, output_path, audio_format=file_format)
                     os.remove(file_path)
                     print(file_path)
-        elif _path.endswith('.ogg'):
+        elif _path.endswith('.ogg') or _path.endswith('.mp3'):
+            file_format = _path.split('.')[-1]
             output_path = os.path.splitext(_path)[0] + '.wav'
-            ogg_to_wav(_path, output_path)
+            to_wav(_path, output_path, audio_format=file_format)
             os.remove(_path)
 
 

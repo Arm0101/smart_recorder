@@ -2,14 +2,15 @@ import os
 from load import load_verification_model, load_emo_model
 from utils import record_audio
 from speaker_diarization import load_pipeline_from_pretrained
-from speaker_verification import speaker_verification
+from matching_networks import speaker_verification, add_new_classes
 from speaker_diarization import segment_audio
 from emotion_recognition import predict_emotion
 from transcription import transcribe_audio
 import librosa
 import sounddevice as sd
 import shutil
-
+import tensorflow as tf
+from utils import load_label_map
 if __name__ == '__main__':
     temp_path = 'temp'
     audio_name = 'audio.wav'
@@ -19,6 +20,11 @@ if __name__ == '__main__':
     pipeline = load_pipeline_from_pretrained(PATH_TO_CONFIG)
     classification_model = load_verification_model('models/speaker_identification.keras')
     emo_model, emo_model_processor = load_emo_model('models/emo_model')
+    embedding_model = tf.keras.models.load_model('models/speaker_identification_embedding.keras')
+    support_set_file_path = 'models/speaker_support_set_embeddings.pkl'
+
+    s, labels, oc_svm = add_new_classes('new_dataset/', embedding_model, support_set_file_path)
+    label_map = load_label_map(label_map_file)
     print('models loaded')
 
     # List available audio devices
@@ -53,13 +59,13 @@ if __name__ == '__main__':
 
             full_path = person_path = os.path.join(temp_path, audio_path)
 
-            prediction, predicted_label, predicted_person = speaker_verification(full_path, classification_model,
-                                                                                 label_map_file)
+            prediction, _ = speaker_verification(full_path, embedding_model, support_set_file_path, oc_svm, label_map)
             print(f'prediction {prediction}\n')
-            print(f'{predicted_label}: {predicted_person}')
+            print(f'{prediction}')
 
             predicted_emotion = predict_emotion(full_path, emo_model, emo_model_processor)
             print(f"emotion: {predicted_emotion}")
 
             text = transcribe_audio(full_path)
             print(f'transcription: {text}')
+
