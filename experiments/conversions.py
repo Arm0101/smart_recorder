@@ -18,9 +18,10 @@ def rename_files_in_directory(directory_path, new_name_prefix):
             print(f"Renombrado: {filename} -> {new_file_name}")
 
 
-rename_files_in_directory("../test/unknown/", "unknown")
-rename_files_in_directory("../new_dataset/carlos", "carlos")
-convert_audios_to_wav('../new_dataset/speaker_1')
-convert_audios_to_wav('../new_dataset/speaker_2')
-convert_audios_to_wav('../new_dataset/speaker_3')
-convert_audios_to_wav('../new_dataset/speaker_4')
+# rename_files_in_directory("../test/unknown/", "unknown")
+# rename_files_in_directory("../new_dataset/carlos", "carlos")
+# convert_audios_to_wav('../new_dataset/speaker_1')
+# convert_audios_to_wav('../new_dataset/speaker_2')
+# convert_audios_to_wav('../new_dataset/speaker_3')
+# convert_audios_to_wav('../new_dataset/speaker_4')
+convert_audios_to_wav('../test/transcriptions')
