@@ -5,7 +5,7 @@ from speaker_diarization import load_pipeline_from_pretrained
 from matching_networks import speaker_verification, add_new_classes
 from speaker_diarization import segment_audio
 from emotion_recognition import predict_emotion
-from transcription import transcribe_audio
+from transcription_w import transcribe_audio, load_model
 import librosa
 import sounddevice as sd
 import shutil
@@ -20,6 +20,7 @@ if __name__ == '__main__':
     pipeline = load_pipeline_from_pretrained(PATH_TO_CONFIG)
     classification_model = load_verification_model('models/speaker_identification.keras')
     emo_model, emo_model_processor = load_emo_model('models/emo_model')
+    transcription_model = load_model()
     embedding_model = tf.keras.models.load_model('models/speaker_identification_embedding.keras')
     support_set_file_path = 'models/speaker_support_set_embeddings.pkl'
 
@@ -66,6 +67,6 @@ if __name__ == '__main__':
             predicted_emotion = predict_emotion(full_path, emo_model, emo_model_processor)
             print(f"emotion: {predicted_emotion}")
 
-            text = transcribe_audio(full_path)
+            text = transcribe_audio(full_path, transcription_model)
             print(f'transcription: {text}')
 

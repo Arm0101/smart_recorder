@@ -80,6 +80,7 @@ if __name__ == '__main__':
     print('ovidio', (err_ovidio / count_ovidio) * 100)
     print('jose', (err_jose / count_jose) * 100)
     print('armando', (err_armando / count_armando) * 100)
+    print('carlos', (err_carlos / count_carlos) * 100)
     print('s1', (err_s1 / count_s1) * 100)
     print('s2', (err_s2 / count_s2) * 100)
     print('s3', (err_s3 / count_s3) * 100)
